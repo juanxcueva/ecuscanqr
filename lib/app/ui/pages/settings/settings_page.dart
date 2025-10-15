@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:ecuscanqr/app/data/resources/local/hive_storage_service.dart';
+import 'package:ecuscanqr/app/domain/repository/qr_repository.dart';
 import 'package:ecuscanqr/app/ui/pages/about/about_page.dart';
 import 'package:ecuscanqr/app/ui/pages/settings/controller/settings_controller.dart';
 import 'package:ecuscanqr/app/ui/themes/app_colors.dart';
@@ -19,9 +19,17 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Consumer(
       builder: (_, ref, __) {
         final controller = ref.watch(settingsProvider);
+
+        // Recargar estadísticas cada vez que se construye la página
+        // usando addPostFrameCallback para evitar llamadas durante build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.refreshStatistics();
+        });
 
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -35,21 +43,24 @@ class SettingsPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32.sp,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.lightText,
+                  color: isDarkTheme ? Colors.white : AppColors.lightText,
                 ),
               ),
               8.verticalSpace,
               Text(
-                "Personaliza tu experiencia",   
+                "Personaliza tu experiencia",
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.grey.shade600,
+                  color: isDarkTheme
+                      ? Colors.white.withOpacity(.8)
+                      : Colors.grey.shade600,
                 ),
               ),
               24.verticalSpace,
 
               // Estadísticas
-              _StatisticsCard(),
+              // Estadísticas (se actualizan automáticamente)
+              _StatisticsCard(statistics: controller.statistics),
               20.verticalSpace,
 
               // Appearance Section
@@ -76,18 +87,21 @@ class SettingsPage extends StatelessWidget {
                 subtitle: "Exportar todos los códigos QR como JSON",
                 onTap: () => _exportHistory(context, controller),
               ),
+              /*
               _SettingTile(
                 icon: Icons.upload_outlined,
                 title: "Importar Historial",
                 subtitle: "Importar códigos QR desde un archivo JSON",
-                onTap: () => _showComingSoon(context, "Import History"),
+                onTap: () =>
+                    _showComingSoon(context, "Importar HistoryHistorial"),
               ),
+              */
               _SettingTile(
                 icon: Icons.delete_sweep_outlined,
                 title: "Limpiar Todo el Historial",
                 subtitle: "Eliminar todos los códigos QR permanentemente",
                 titleColor: Colors.red,
-                onTap: () => _confirmClearAll(context, controller),
+                onTap: () => _confirmClearAll(context, controller, isDarkTheme),
               ),
               12.verticalSpace,
 
@@ -125,6 +139,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle: "Compartir EcuaScanQR con amigos",
                 onTap: () => _shareApp(context),
               ),
+              /*
               _SettingTile(
                 icon: Icons.star_outline,
                 title: "Calificar Aplicación",
@@ -137,6 +152,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle: "Ayuda a mejorar la aplicación",
                 onTap: () => _showComingSoon(context, "Report Bug"),
               ),
+              */
               _SettingTile(
                 icon: Icons.info_outline,
                 title: "Acerca de",
@@ -179,7 +195,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _exportHistory(BuildContext context, SettingsController controller) {
-    final stats = HiveStorageService.getStatistics();
+    final qrRepository = Get.find<QrRepository>();
+
+    final stats = qrRepository.getStatistics();
     final total = stats['total'] ?? 0;
 
     if (total == 0) {
@@ -194,7 +212,9 @@ class SettingsPage extends StatelessWidget {
           ),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
@@ -203,25 +223,47 @@ class SettingsPage extends StatelessWidget {
     controller.exportHistory(context);
   }
 
-  void _confirmClearAll(BuildContext context, SettingsController controller) {
+  void _confirmClearAll(
+    BuildContext context,
+    SettingsController controller,
+    bool isDarkTheme,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         title: Row(
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28.r),
             12.horizontalSpace,
-            const Text('Eliminar Todos los Datos?'),
+            Text(
+              'Eliminar Todos los Datos?',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: isDarkTheme ? Colors.white : Colors.black,
+              ),
+            ),
           ],
         ),
-        content: const Text(
+        content: Text(
           'Esto eliminará permanentemente todos sus códigos QR. Esta acción no se puede deshacer.',
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: isDarkTheme ? Colors.white : Colors.black,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -229,7 +271,14 @@ class SettingsPage extends StatelessWidget {
               Navigator.pop(ctx);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Eliminar Todos'),
+            child: Text(
+              'Eliminar Todos',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -239,7 +288,7 @@ class SettingsPage extends StatelessWidget {
   void _shareApp(BuildContext context) {
     Share.share(
       'Descubre EcuaScanQR - La mejor aplicación para generar y escanear códigos QR!\n\n'
-      'Descárgalo ahora: [App Store Link]',
+      'Descárgalo ahora: https://play.google.com/store/apps/details?id=com.juanxcueva.ecuscanqr',
       subject: 'Intenta EcuaScanQR!',
     );
   }
@@ -257,11 +306,17 @@ class SettingsPage extends StatelessWidget {
 
 /* ------------------------------ Statistics Card ------------------------------ */
 
+/* ------------------------------ Statistics Card ------------------------------ */
+
 class _StatisticsCard extends StatelessWidget {
+  final Map<String, int> statistics;
+
+  const _StatisticsCard({required this.statistics});
+
   @override
   Widget build(BuildContext context) {
-    final stats = HiveStorageService.getStatistics();
-
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(20.r),
       child: BackdropFilter(
@@ -271,8 +326,12 @@ class _StatisticsCard extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF6461FF).withOpacity(.15),
-                const Color(0xFF8B87FF).withOpacity(.10),
+               isDarkTheme
+                    ? Colors.white.withOpacity(.15)
+                    : const Color(0xFF6461FF).withOpacity(.15),
+                isDarkTheme
+                    ? Colors.white.withOpacity(.10)
+                    : const Color(0xFF8B87FF).withOpacity(.10),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -292,11 +351,11 @@ class _StatisticsCard extends StatelessWidget {
                   ),
                   12.horizontalSpace,
                   Text(
-                    "Estadísticas de Uso",
+                    "Estadísticas",
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.lightText,
+                      color: isDarkTheme ? Colors.white : AppColors.lightText,
                     ),
                   ),
                 ],
@@ -307,25 +366,25 @@ class _StatisticsCard extends StatelessWidget {
                 children: [
                   _StatItem(
                     label: "Total",
-                    value: stats['total'] ?? 0,
+                    value: statistics['total'] ?? 0,
                     icon: Icons.qr_code_2,
                     color: const Color(0xFF6461FF),
                   ),
                   _StatItem(
-                    label: "Generados",
-                    value: stats['generated'] ?? 0,
+                    label: "Creados",
+                    value: statistics['generated'] ?? 0,
                     icon: Icons.add_circle_outline,
                     color: Colors.green,
                   ),
                   _StatItem(
                     label: "Escaneados",
-                    value: stats['scanned'] ?? 0,
+                    value: statistics['scanned'] ?? 0,
                     icon: Icons.qr_code_scanner,
                     color: Colors.blue,
                   ),
                   _StatItem(
                     label: "Favoritos",
-                    value: stats['favorites'] ?? 0,
+                    value: statistics['favorites'] ?? 0,
                     icon: Icons.star,
                     color: Colors.amber,
                   ),
@@ -338,6 +397,7 @@ class _StatisticsCard extends StatelessWidget {
     );
   }
 }
+
 
 class _StatItem extends StatelessWidget {
   final String label;
@@ -354,6 +414,8 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Column(
       children: [
         Container(
@@ -370,7 +432,7 @@ class _StatItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.lightText,
+            color: isDarkTheme ? Colors.white : AppColors.lightText,
           ),
         ),
         2.verticalSpace,
@@ -378,7 +440,9 @@ class _StatItem extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 11.sp,
-            color: Colors.grey.shade600,
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.8)
+                : Colors.grey.shade600,
           ),
         ),
       ],
@@ -395,6 +459,8 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(left: 4.w),
       child: Text(
@@ -402,7 +468,7 @@ class _SectionHeader extends StatelessWidget {
         style: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.w700,
-          color: AppColors.lightText,
+          color: isDarkTheme ? Colors.white : AppColors.lightText,
         ),
       ),
     );
@@ -430,6 +496,8 @@ class _SettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
       child: ClipRRect(
@@ -437,27 +505,38 @@ class _SettingTile extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Material(
-            color: Colors.white.withOpacity(.6),
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.1)
+                : Colors.white.withOpacity(.6),
             child: InkWell(
               onTap: onTap,
               child: Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: Colors.white.withOpacity(.8)),
+                  border: Border.all(
+                    color: isDarkTheme
+                        ? Colors.white.withOpacity(.8)
+                        : Colors.transparent,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: EdgeInsets.all(10.w),
                       decoration: BoxDecoration(
-                        color: titleColor?.withOpacity(.1) ??
-                            const Color(0xFF6461FF).withOpacity(.1),
+                        color: isDarkTheme
+                            ? titleColor?.withOpacity(.1) ??
+                                  const Color(0xFF6461FF).withOpacity(.1)
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Icon(
                         icon,
-                        color: titleColor ?? const Color(0xFF6461FF),
+                        color: isDarkTheme
+                            ? titleColor?.withOpacity(.8) ??
+                                  const Color(0xFF6461FF).withOpacity(.8)
+                            : titleColor ?? const Color(0xFF6461FF),
                         size: 22.r,
                       ),
                     ),
@@ -471,7 +550,9 @@ class _SettingTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
-                              color: titleColor ?? Colors.black87,
+                              color: isDarkTheme
+                                  ? Colors.white.withOpacity(.8)
+                                  : Colors.black87,
                             ),
                           ),
                           4.verticalSpace,
@@ -479,7 +560,9 @@ class _SettingTile extends StatelessWidget {
                             subtitle,
                             style: TextStyle(
                               fontSize: 12.sp,
-                              color: Colors.grey.shade600,
+                              color: isDarkTheme
+                                  ? Colors.white.withOpacity(.8)
+                                  : Colors.grey.shade600,
                             ),
                           ),
                         ],

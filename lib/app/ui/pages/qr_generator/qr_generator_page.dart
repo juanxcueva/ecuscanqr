@@ -18,6 +18,9 @@ class QrGeneratorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+   
+     final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Consumer(
       builder: (_, ref, __) {
         final controller = ref.watch(qrGeneratorProvider)..setQrType(qrType);
@@ -26,7 +29,7 @@ class QrGeneratorPage extends StatelessWidget {
           // Cerrar teclado al tocar fuera
           onTap: () => FocusScope.of(context).unfocus(),
           child: Scaffold(
-            backgroundColor: const Color(0xFFF3F5FF),
+            backgroundColor: isDarkTheme ? Colors.grey.withOpacity(.12) : const Color(0xFFF3F5FF),
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -38,9 +41,9 @@ class QrGeneratorPage extends StatelessWidget {
                 },
               ),
               title: Text(
-                'Create ${_getTypeTitle(qrType)} QR',
+                'Crear ${_getTypeTitle(qrType)} QR',
                 style: TextStyle(
-                  color: AppColors.lightText,
+                  color: isDarkTheme ? Colors.white : AppColors.lightText,
                   fontWeight: FontWeight.w700,
                   fontSize: 18.sp,
                 ),
@@ -135,6 +138,8 @@ class _QrPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(24.r),
       child: BackdropFilter(
@@ -142,12 +147,12 @@ class _QrPreviewCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(24.w),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.85),
+            color: isDarkTheme ? Colors.grey.withOpacity(.9) : Colors.white.withOpacity(.85),
             borderRadius: BorderRadius.circular(24.r),
-            border: Border.all(color: Colors.white.withOpacity(.9)),
+            border: Border.all(color: isDarkTheme ? Colors.grey.withOpacity(.9) : Colors.white.withOpacity(.9)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF9FB4FF).withOpacity(.2),
+                color: isDarkTheme ? Colors.grey.withOpacity(.2) : const Color(0xFF9FB4FF).withOpacity(.2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -158,7 +163,7 @@ class _QrPreviewCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDarkTheme ? Colors.black.withOpacity(.85) : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
                 child: data.isEmpty
@@ -167,14 +172,14 @@ class _QrPreviewCard extends StatelessWidget {
                         data: data,
                         version: QrVersions.auto,
                         size: 220.w,
-                        backgroundColor: Colors.white,
+                        backgroundColor: isDarkTheme ? Colors.white.withOpacity(.85) : Colors.white,
                         errorStateBuilder: (ctx, err) => _ErrorQrPlaceholder(),
                       ),
               ),
               if (data.isNotEmpty) ...[
                 16.verticalSpace,
                 Text(
-                  isValid ? 'QR Code Ready!' : 'Invalid data',
+                  isValid ? 'Código QR listo!' : 'Datos inválidos',
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -193,6 +198,8 @@ class _QrPreviewCard extends StatelessWidget {
 class _EmptyQrPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return SizedBox(
       width: 220.w,
       height: 220.w,
@@ -203,14 +210,14 @@ class _EmptyQrPlaceholder extends StatelessWidget {
             Icon(
               Icons.qr_code_2_rounded,
               size: 80.r,
-              color: Colors.grey.shade300,
+              color: isDarkTheme ? Colors.grey.shade300.withOpacity(.8) : Colors.grey.shade300,
             ),
             12.verticalSpace,
             Text(
-              'Fill the form to generate',
+              'LLena el formulario para generar',
               style: TextStyle(
                 fontSize: 12.sp,
-                color: Colors.grey.shade400,
+                color: isDarkTheme ? Colors.grey.shade400.withOpacity(.8) : Colors.grey.shade400,
               ),
             ),
           ],
@@ -250,7 +257,7 @@ class _WebsiteForm extends StatelessWidget {
       child: Column(
         children: [
           _CustomTextField(
-            label: 'Website URL',
+            label: 'Sitio Web URL',
             hint: 'https://example.com',
             icon: Icons.link,
             onChanged: (value) => controller.updateField('url', value),
@@ -273,8 +280,8 @@ class _TextForm extends StatelessWidget {
       child: Column(
         children: [
           _CustomTextField(
-            label: 'Text Content',
-            hint: 'Enter your text here',
+            label: 'Contenido de texto',
+            hint: 'Ingresa tu texto aquí',
             icon: Icons.text_fields,
             onChanged: (value) => controller.updateField('text', value),
             maxLines: 5,
@@ -296,7 +303,7 @@ class _EmailForm extends StatelessWidget {
       child: Column(
         children: [
           _CustomTextField(
-            label: 'Email Address',
+            label: 'Dirección de correo electrónico',
             hint: 'example@email.com',
             icon: Icons.email,
             onChanged: (value) => controller.updateField('email', value),
@@ -304,15 +311,15 @@ class _EmailForm extends StatelessWidget {
           ),
           16.verticalSpace,
           _CustomTextField(
-            label: 'Subject (Optional)',
-            hint: 'Email subject',
+            label: 'Asunto (Opcional)',
+            hint: 'Asunto del correo',
             icon: Icons.subject,
             onChanged: (value) => controller.updateField('subject', value),
           ),
           16.verticalSpace,
           _CustomTextField(
-            label: 'Message (Optional)',
-            hint: 'Email body',
+            label: 'Mensaje (Opcional)',
+            hint: 'Cuerpo del mensaje',
             icon: Icons.message,
             onChanged: (value) => controller.updateField('body', value),
             maxLines: 3,
@@ -334,7 +341,7 @@ class _SmsForm extends StatelessWidget {
       child: Column(
         children: [
           _CustomTextField(
-            label: 'Phone Number',
+            label: 'Número de teléfono',
             hint: '+593 999 999 999',
             icon: Icons.phone,
             onChanged: (value) => controller.updateField('phone', value),
@@ -342,8 +349,8 @@ class _SmsForm extends StatelessWidget {
           ),
           16.verticalSpace,
           _CustomTextField(
-            label: 'Message',
-            hint: 'SMS message',
+            label: 'Mensaje (Opcional)',
+            hint: 'Mensaje SMS',
             icon: Icons.message,
             onChanged: (value) => controller.updateField('message', value),
             maxLines: 3,
@@ -365,15 +372,15 @@ class _WifiForm extends StatelessWidget {
       child: Column(
         children: [
           _CustomTextField(
-            label: 'Network Name (SSID)',
-            hint: 'WiFi Network',
+            label: 'Nombre de la red (SSID)',
+            hint: 'Nombre de la red WiFi',
             icon: Icons.wifi,
             onChanged: (value) => controller.updateField('ssid', value),
           ),
           16.verticalSpace,
           _CustomTextField(
-            label: 'Password',
-            hint: 'WiFi Password',
+            label: 'Contraseña (Opcional)',
+            hint: 'Contraseña WiFi',
             icon: Icons.lock,
             onChanged: (value) => controller.updateField('password', value),
             obscureText: true,
@@ -397,6 +404,8 @@ class _GlassFormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(20.r),
       child: BackdropFilter(
@@ -404,9 +413,9 @@ class _GlassFormCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.7),
+            color: isDarkTheme ? Colors.grey.withOpacity(.8) : Colors.white.withOpacity(.7),
             borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: Colors.white.withOpacity(.8)),
+            border: Border.all(color: isDarkTheme ? Colors.grey.withOpacity(.8) : Colors.white.withOpacity(.8)),
           ),
           child: child,
         ),
@@ -436,6 +445,8 @@ class _CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,14 +468,14 @@ class _CustomTextField extends StatelessWidget {
             hintText: hint,
             prefixIcon: Icon(icon, color: const Color(0xFF6461FF)),
             filled: true,
-            fillColor: Colors.white.withOpacity(.9),
+            fillColor: isDarkTheme ? Colors.grey.withOpacity(.8) : Colors.white.withOpacity(.9),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(color: isDarkTheme ? Colors.grey.shade600 : Colors.grey.shade200),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
@@ -558,7 +569,7 @@ class _GenerateButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          'Save QR Code',
+          'Guardar Código QR',
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,

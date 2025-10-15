@@ -15,13 +15,13 @@ class AboutPage extends StatelessWidget {
 
   Future<void> _openUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
@@ -42,13 +42,21 @@ class AboutPage extends StatelessWidget {
                     icon: Container(
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.7),
+                        color: isDarkTheme
+                            ? Colors.white.withOpacity(.1)
+                            : Colors.white.withOpacity(.7),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(.8)),
+                        border: Border.all(
+                          color: isDarkTheme
+                              ? Colors.white.withOpacity(.2)
+                              : Colors.white.withOpacity(.8),
+                        ),
                       ),
                       child: Icon(
                         Icons.arrow_back_ios_new,
-                        color: const Color(0xFF6461FF),
+                        color: isDarkTheme
+                            ? Colors.white.withOpacity(.8)
+                            : const Color(0xFF6461FF),
                         size: 20.r,
                       ),
                     ),
@@ -91,7 +99,9 @@ class AboutPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.lightText,
+                            color: isDarkTheme
+                                ? Colors.white
+                                : AppColors.lightText,
                           ),
                         ),
                         8.verticalSpace,
@@ -104,7 +114,9 @@ class AboutPage extends StatelessWidget {
                               "Version $version",
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: Colors.grey.shade600,
+                                color: isDarkTheme
+                                    ? Colors.white.withOpacity(.8)
+                                    : Colors.grey.shade600,
                               ),
                             );
                           },
@@ -116,7 +128,7 @@ class AboutPage extends StatelessWidget {
 
                   // Developer info
                   _InfoCard(
-                    title: "Developed by",
+                    title: "Desarrollado por",
                     items: [
                       _InfoItem(
                         icon: FontAwesomeIcons.code,
@@ -126,7 +138,7 @@ class AboutPage extends StatelessWidget {
                       ),
                       _InfoItem(
                         icon: FontAwesomeIcons.locationDot,
-                        label: "Location",
+                        label: "Ubicación",
                         value: "Cuenca, Ecuador",
                         onTap: null,
                       ),
@@ -136,13 +148,14 @@ class AboutPage extends StatelessWidget {
 
                   // Social links
                   _InfoCard(
-                    title: "Connect",
+                    title: "Conecta conmigo",
                     items: [
                       _InfoItem(
                         icon: FontAwesomeIcons.instagram,
                         label: "Instagram",
                         value: "@juanxcueva",
-                        onTap: () => _openUrl('https://www.instagram.com/juanxcueva'),
+                        onTap: () =>
+                            _openUrl('https://www.instagram.com/juanxcueva'),
                       ),
                       _InfoItem(
                         icon: FontAwesomeIcons.github,
@@ -156,19 +169,22 @@ class AboutPage extends StatelessWidget {
 
                   // Buy me a coffee button
                   _CoffeeButton(
-                    onTap: () => _openUrl('https://www.buymeacoffee.com/juanxcueva'),
+                    onTap: () =>
+                        _openUrl('https://www.buymeacoffee.com/juanxcueva'),
                   ),
                   24.verticalSpace,
 
                   // App description
                   _InfoCard(
-                    title: "About the App",
+                    title: "Acerca de la App",
                     items: [
                       _DescriptionItem(
-                        text: "EcuaScanQR is a powerful and easy-to-use QR code "
-                            "generator and scanner. Create QR codes for websites, "
-                            "texts, emails, SMS, and WiFi networks. Scan any QR "
-                            "code instantly and manage your history.",
+                        text:
+                            "EcuaScanQR es una app muy poderosa y fácil de usar, sirve "
+                            "para generar y escanear códigos QR. Crea códigos QR "
+                            "para sitios web, textos, correos electrónicos, SMS y "
+                            "redes WiFi. Escanea cualquier código QR instantáneamente "
+                            "y gestiona tu historial.",
                       ),
                     ],
                   ),
@@ -183,7 +199,9 @@ class AboutPage extends StatelessWidget {
                           "Made with",
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Colors.grey.shade600,
+                            color: isDarkTheme
+                                ? Colors.white.withOpacity(.8)
+                                : Colors.grey.shade600,
                           ),
                         ),
                         6.horizontalSpace,
@@ -197,7 +215,9 @@ class AboutPage extends StatelessWidget {
                           "in Ecuador",
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Colors.grey.shade600,
+                            color: isDarkTheme
+                                ? Colors.white.withOpacity(.8)
+                                : Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -220,13 +240,15 @@ class _SoftLightBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFFF3F5FF),
-            Color(0xFFF7F8FB),
-            Color(0xFFF9F5FF),
+            isDarkTheme ? Color(0xFF1F2129) : Color(0xFFF3F5FF),
+            isDarkTheme ? Color(0xFF262833) : Color(0xFFF7F8FB),
+            isDarkTheme ? Color(0xFF303340) : Color(0xFFF9F5FF),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -242,13 +264,12 @@ class _InfoCard extends StatelessWidget {
   final String title;
   final List<Widget> items;
 
-  const _InfoCard({
-    required this.title,
-    required this.items,
-  });
+  const _InfoCard({required this.title, required this.items});
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -259,7 +280,9 @@ class _InfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
-              color: AppColors.lightText,
+              color: isDarkTheme
+                  ? Colors.white.withOpacity(.8)
+                  : Colors.black87,
             ),
           ),
         ),
@@ -269,13 +292,17 @@ class _InfoCard extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.7),
+                color: isDarkTheme
+                    ? Colors.white.withOpacity(.1)
+                    : Colors.white.withOpacity(.7),
                 borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.white.withOpacity(.8)),
+                border: Border.all(
+                  color: isDarkTheme
+                      ? Colors.white.withOpacity(.2)
+                      : Colors.white.withOpacity(.8),
+                ),
               ),
-              child: Column(
-                children: items,
-              ),
+              child: Column(children: items),
             ),
           ),
         ),
@@ -301,6 +328,8 @@ class _InfoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -310,7 +339,9 @@ class _InfoItem extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: Colors.grey.shade200,
+                color: isDarkTheme
+                    ? Colors.white.withOpacity(.2)
+                    : Colors.grey.shade200,
                 width: 1,
               ),
             ),
@@ -320,12 +351,16 @@ class _InfoItem extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6461FF).withOpacity(.1),
+                  color: isDarkTheme
+                      ? Colors.white.withOpacity(.2)
+                      : const Color(0xFF6461FF).withOpacity(.1),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: FaIcon(
                   icon,
-                  color: const Color(0xFF6461FF),
+                  color: isDarkTheme
+                      ? Colors.white.withOpacity(.8)
+                      : const Color(0xFF6461FF),
                   size: 20.r,
                 ),
               ),
@@ -338,7 +373,9 @@ class _InfoItem extends StatelessWidget {
                       label,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: Colors.grey.shade600,
+                        color: isDarkTheme
+                            ? Colors.white.withOpacity(.8)
+                            : Colors.grey.shade600,
                       ),
                     ),
                     4.verticalSpace,
@@ -347,7 +384,9 @@ class _InfoItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: isDarkTheme
+                            ? Colors.white.withOpacity(.8)
+                            : Colors.black87,
                       ),
                     ),
                   ],
@@ -357,7 +396,9 @@ class _InfoItem extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16.r,
-                  color: Colors.grey.shade400,
+                  color: isDarkTheme
+                      ? Colors.white.withOpacity(.8)
+                      : Colors.grey.shade400,
                 ),
             ],
           ),
@@ -376,6 +417,8 @@ class _DescriptionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: Text(
@@ -383,7 +426,9 @@ class _DescriptionItem extends StatelessWidget {
         style: TextStyle(
           fontSize: 14.sp,
           height: 1.6,
-          color: Colors.grey.shade700,
+          color: isDarkTheme
+              ? Colors.white.withOpacity(.8)
+              : Colors.grey.shade700,
         ),
         textAlign: TextAlign.justify,
       ),
@@ -424,11 +469,7 @@ class _CoffeeButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(
-              FontAwesomeIcons.mugHot,
-              color: Colors.white,
-              size: 24.r,
-            ),
+            FaIcon(FontAwesomeIcons.mugHot, color: Colors.white, size: 24.r),
             12.horizontalSpace,
             Text(
               "Buy me a coffee",

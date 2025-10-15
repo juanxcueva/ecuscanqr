@@ -2,79 +2,80 @@ import 'package:ecuscanqr/app/domain/model/hive/qr_code_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveStorageService {
-  static const String _qrBoxName = 'qr_codes';
-  static const String _settingsBoxName = 'settings';
-  
-  static Box<QrCodeModel>? _qrBox;
-  static Box? _settingsBox;
+  final String _qrBoxName = 'qr_codes';
+  final String _settingsBoxName = 'settings';
+
+  Box<QrCodeModel>? _qrBox;
+  Box? _settingsBox;
 
   // Inicializar Hive
-  static Future<void> init() async {
+  Future<void> init() async {
     await Hive.initFlutter();
-    
+
     // Registrar adaptador
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(QrCodeModelAdapter());
     }
-    
+
     // Abrir boxes
     _qrBox = await Hive.openBox<QrCodeModel>(_qrBoxName);
     _settingsBox = await Hive.openBox(_settingsBoxName);
   }
 
   // Verificar si está inicializado
-  static bool get isInitialized => _qrBox != null && _settingsBox != null;
+  bool get isInitialized => _qrBox != null && _settingsBox != null;
 
   /* ------------------------------ QR Codes ------------------------------ */
 
   // Guardar QR (generado o escaneado)
-  static Future<void> saveQr(QrCodeModel qr) async {
+  Future<void> saveQr(QrCodeModel qr) async {
     if (!isInitialized) await init();
     await _qrBox!.put(qr.id, qr);
   }
 
   // Obtener todos los QRs
-  static List<QrCodeModel> getAllQrs() {
+  List<QrCodeModel> getAllQrs() {
     if (!isInitialized) return [];
-    return _qrBox!.values.toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Más recientes primero
+    return _qrBox!.values.toList()..sort(
+      (a, b) => b.createdAt.compareTo(a.createdAt),
+    ); // Más recientes primero
   }
 
   // Obtener QRs generados
-  static List<QrCodeModel> getGeneratedQrs() {
+  List<QrCodeModel> getGeneratedQrs() {
     return getAllQrs().where((qr) => !qr.isScanned).toList();
   }
 
   // Obtener QRs escaneados
-  static List<QrCodeModel> getScannedQrs() {
+  List<QrCodeModel> getScannedQrs() {
     return getAllQrs().where((qr) => qr.isScanned).toList();
   }
 
   // Obtener favoritos
-  static List<QrCodeModel> getFavoriteQrs() {
+  List<QrCodeModel> getFavoriteQrs() {
     return getAllQrs().where((qr) => qr.isFavorite).toList();
   }
 
   // Obtener QR por ID
-  static QrCodeModel? getQrById(String id) {
+  QrCodeModel? getQrById(String id) {
     if (!isInitialized) return null;
     return _qrBox!.get(id);
   }
 
   // Actualizar QR
-  static Future<void> updateQr(QrCodeModel qr) async {
+  Future<void> updateQr(QrCodeModel qr) async {
     if (!isInitialized) await init();
     await _qrBox!.put(qr.id, qr);
   }
 
   // Eliminar QR
-  static Future<void> deleteQr(String id) async {
+  Future<void> deleteQr(String id) async {
     if (!isInitialized) return;
     await _qrBox!.delete(id);
   }
 
   // Alternar favorito
-  static Future<void> toggleFavorite(String id) async {
+  Future<void> toggleFavorite(String id) async {
     final qr = getQrById(id);
     if (qr != null) {
       qr.isFavorite = !qr.isFavorite;
@@ -83,13 +84,13 @@ class HiveStorageService {
   }
 
   // Limpiar todo el historial
-  static Future<void> clearAllQrs() async {
+  Future<void> clearAllQrs() async {
     if (!isInitialized) return;
     await _qrBox!.clear();
   }
 
   // Limpiar solo generados
-  static Future<void> clearGeneratedQrs() async {
+  Future<void> clearGeneratedQrs() async {
     if (!isInitialized) return;
     final generated = getGeneratedQrs();
     for (var qr in generated) {
@@ -98,7 +99,7 @@ class HiveStorageService {
   }
 
   // Limpiar solo escaneados
-  static Future<void> clearScannedQrs() async {
+  Future<void> clearScannedQrs() async {
     if (!isInitialized) return;
     final scanned = getScannedQrs();
     for (var qr in scanned) {
@@ -107,24 +108,24 @@ class HiveStorageService {
   }
 
   // Buscar QRs
-  static List<QrCodeModel> searchQrs(String query) {
+  List<QrCodeModel> searchQrs(String query) {
     if (query.isEmpty) return getAllQrs();
-    
+
     final lowerQuery = query.toLowerCase();
     return getAllQrs().where((qr) {
       return qr.displayTitle.toLowerCase().contains(lowerQuery) ||
-             qr.data.toLowerCase().contains(lowerQuery) ||
-             qr.type.toLowerCase().contains(lowerQuery);
+          qr.data.toLowerCase().contains(lowerQuery) ||
+          qr.type.toLowerCase().contains(lowerQuery);
     }).toList();
   }
 
   // Filtrar por tipo
-  static List<QrCodeModel> filterByType(String type) {
+  List<QrCodeModel> filterByType(String type) {
     return getAllQrs().where((qr) => qr.type == type).toList();
   }
 
   // Obtener estadísticas
-  static Map<String, int> getStatistics() {
+  Map<String, int> getStatistics() {
     final all = getAllQrs();
     return {
       'total': all.length,
@@ -142,19 +143,19 @@ class HiveStorageService {
   /* ------------------------------ Settings ------------------------------ */
 
   // Guardar configuración
-  static Future<void> saveSetting(String key, dynamic value) async {
+  Future<void> saveSetting(String key, dynamic value) async {
     if (!isInitialized) await init();
     await _settingsBox!.put(key, value);
   }
 
   // Obtener configuración
-  static T? getSetting<T>(String key, {T? defaultValue}) {
+  T? getSetting<T>(String key, {T? defaultValue}) {
     if (!isInitialized) return defaultValue;
     return _settingsBox!.get(key, defaultValue: defaultValue) as T?;
   }
 
   // Cerrar Hive (llamar al cerrar la app)
-  static Future<void> close() async {
+  Future<void> close() async {
     await _qrBox?.close();
     await _settingsBox?.close();
   }

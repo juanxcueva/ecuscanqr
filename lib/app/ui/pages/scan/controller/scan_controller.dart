@@ -1,11 +1,12 @@
 import 'package:ecuscanqr/app/domain/model/hive/qr_code_model.dart';
-import 'package:flutter/material.dart';
+import 'package:ecuscanqr/app/domain/repository/qr_repository.dart';
 import 'package:flutter_meedu/meedu.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ecuscanqr/app/data/resources/local/hive_storage_service.dart';
 
 class ScanController extends SimpleNotifier {
+  final qrRepository = Get.find<QrRepository>();
+
   MobileScannerController? scannerController;
   
   bool _isScanning = false;
@@ -155,7 +156,7 @@ class ScanController extends SimpleNotifier {
         isScanned: true,
       );
 
-      await HiveStorageService.saveQr(qrCode);
+      await qrRepository.saveQr(qrCode);
     } catch (e) {
       print('Error saving scanned QR: $e');
     }

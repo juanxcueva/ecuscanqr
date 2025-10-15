@@ -64,7 +64,7 @@ class _ScannerView extends StatelessWidget {
       errorBuilder: (context, error, child) {
         return Center(
           child: Text(
-            'Error: ${error.errorDetails?.message ?? 'Unknown error'}',
+            'Error: ${error.errorDetails?.message ?? 'Error desconocido'}',
             style: const TextStyle(color: Colors.white),
           ),
         );
@@ -97,7 +97,7 @@ class _PermissionDeniedView extends StatelessWidget {
               ),
               24.verticalSpace,
               Text(
-                'Camera Permission Required',
+                'Permiso de cámara requerido',
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w700,
@@ -107,7 +107,7 @@ class _PermissionDeniedView extends StatelessWidget {
               ),
               12.verticalSpace,
               Text(
-                'Please grant camera access to scan QR codes',
+                'Por favor, concede acceso a la cámara para escanear códigos QR',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: Colors.white.withOpacity(.7),
@@ -127,12 +127,12 @@ class _PermissionDeniedView extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: const Text(
-                                  'Camera permission denied. Please enable it in Settings.',
+                                  'Permiso de cámara denegado. Por favor, habilítalo en Ajustes.',
                                 ),
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
                                 action: SnackBarAction(
-                                  label: 'Open Settings',
+                                  label: 'Abrir Ajustes',
                                   textColor: Colors.white,
                                   onPressed: () => openAppSettings(),
                                 ),
@@ -161,7 +161,7 @@ class _PermissionDeniedView extends StatelessWidget {
                             ),
                             12.horizontalSpace,
                             Text(
-                              'Initializing...',
+                              'Inicializando...',
                               style: TextStyle(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
@@ -170,7 +170,7 @@ class _PermissionDeniedView extends StatelessWidget {
                           ],
                         )
                       : Text(
-                          'Grant Permission',
+                          'Conceder Permiso',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -220,7 +220,7 @@ class _ScannerOverlay extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Scan QR Code',
+                  'Escanear Código QR',
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -268,7 +268,7 @@ class _ScannerOverlay extends StatelessWidget {
                         ),
                         _ControlButton(
                           icon: Icons.flip_camera_ios,
-                          label: 'Flip',
+                          label: 'Cambiar Cámara',
                           onTap: controller.switchCamera,
                         ),
                       ],
@@ -534,7 +534,7 @@ class _ScannedResultSheet extends StatelessWidget {
               16.verticalSpace,
 
               Text(
-                'QR Code Scanned!',
+                'Código QR Escaneado!',
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
@@ -569,7 +569,7 @@ class _ScannedResultSheet extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: onClose,
                       icon: const Icon(Icons.close),
-                      label: const Text('Close'),
+                      label: const Text('Cerrar'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.grey.shade700,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -585,7 +585,7 @@ class _ScannedResultSheet extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _handleAction(code),
                       icon: const Icon(Icons.open_in_new),
-                      label: const Text('Open'),
+                      label: const Text('Abrir'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6461FF),
                         foregroundColor: Colors.white,

@@ -30,7 +30,7 @@ class BottomNavBarPage extends StatelessWidget {
     return Consumer(
       builder: (_, ref, __) {
         final controller = ref.watch(homeProvider);
-        
+
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: overlay,
           child: Scaffold(
@@ -47,7 +47,9 @@ class BottomNavBarPage extends StatelessWidget {
                     children: [
                       // IndexedStack mantiene el estado de todas las páginas
                       Padding(
-                        padding: EdgeInsets.only(bottom: 80.h), // Espacio para el navbar
+                        padding: EdgeInsets.only(
+                          bottom: 80.h,
+                        ), // Espacio para el navbar
                         child: IndexedStack(
                           index: controller.currentPageIndex,
                           children: const [
@@ -76,7 +78,9 @@ class BottomNavBarPage extends StatelessWidget {
                               );
                             } else {
                               // Para otras pestañas, cambiar normalmente
-                              controller.changePage(index > 1 ? index - 1 : index);
+                              controller.changePage(
+                                index > 1 ? index - 1 : index,
+                              );
                             }
                           },
                         ),
@@ -100,14 +104,22 @@ class _SoftLightBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xFFF3F5FF),
-            Color(0xFFF7F8FB),
-            Color(0xFFF9F5FF),
-          ],
+          colors: isDarkTheme
+              ? [
+                  Color(0xFF1c1f27),
+                  Color(0xFF1c1f27),
+                ] // Colores para modo oscuro
+              : [
+                  Color(0xFFF3F5FF),
+                  Color(0xFFF7F8FB),
+                  Color(0xFFF9F5FF),
+                ], // Colores para modo claro
+
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -122,13 +134,12 @@ class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const _BottomNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(24.r),
       child: BackdropFilter(
@@ -136,12 +147,20 @@ class _BottomNavBar extends StatelessWidget {
         child: Container(
           height: 72.h,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.92),
+            color: isDarkTheme
+                ? Colors.grey.withOpacity(.12)
+                : Colors.white.withOpacity(.92),
             borderRadius: BorderRadius.circular(24.r),
-            border: Border.all(color: Colors.white.withOpacity(.75)),
+            border: Border.all(
+              color: isDarkTheme
+                  ? Colors.grey.withOpacity(.25)
+                  : Colors.white.withOpacity(.75),
+            ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF9FB4FF).withOpacity(.26),
+                color: isDarkTheme
+                    ? Colors.grey.withOpacity(.26)
+                    : const Color(0xFF9FB4FF).withOpacity(.26),
                 blurRadius: 26,
                 offset: const Offset(0, 10),
               ),
@@ -151,31 +170,27 @@ class _BottomNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Create QR
               _NavItem(
                 icon: Icons.qr_code_2_rounded,
                 label: "Crear",
                 selected: currentIndex == 0,
                 onTap: () => onTap(0),
+                isDarkTheme: isDarkTheme,
               ),
-              
-              // Scanner (botón central especial)
-              _ScanButton(onTap: () => onTap(1)),
-              
-              // History
+              _ScanButton(onTap: () => onTap(1), isDarkTheme: isDarkTheme),
               _NavItem(
                 icon: Icons.history_rounded,
                 label: "Historial",
                 selected: currentIndex == 1,
                 onTap: () => onTap(2),
+                isDarkTheme: isDarkTheme,
               ),
-              
-              // Settings
               _NavItem(
                 icon: Icons.settings_rounded,
                 label: "Configuración",
                 selected: currentIndex == 2,
                 onTap: () => onTap(3),
+                isDarkTheme: isDarkTheme,
               ),
             ],
           ),
@@ -189,8 +204,9 @@ class _BottomNavBar extends StatelessWidget {
 
 class _ScanButton extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isDarkTheme;
 
-  const _ScanButton({required this.onTap});
+  const _ScanButton({required this.onTap, required this.isDarkTheme});
 
   @override
   Widget build(BuildContext context) {
@@ -201,15 +217,22 @@ class _ScanButton extends StatelessWidget {
         width: 56.r,
         height: 56.r,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6461FF), Color(0xFF8B87FF)],
+          gradient: LinearGradient(
+            colors: isDarkTheme
+                ? [Color(0xFF6461FF), Color(0xFF8B87FF)] // Dark theme gradient
+                : [
+                    Color(0xFF8B87FF),
+                    Color(0xFF6461FF),
+                  ], // Light theme gradient
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6461FF).withOpacity(.4),
+              color: isDarkTheme
+                  ? Colors.white.withOpacity(.4)
+                  : const Color(0xFF6461FF).withOpacity(.4),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -232,18 +255,22 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool isDarkTheme;
 
   const _NavItem({
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
+    required this.isDarkTheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    final Color active = const Color(0xFF5D6BFF);
-    final Color inactive = const Color(0xFF9AA4B2);
+    final Color active = isDarkTheme ? Colors.blue : const Color(0xFF5D6BFF);
+    final Color inactive = isDarkTheme
+        ? Colors.white.withOpacity(.6)
+        : const Color(0xFF9AA4B2);
 
     return InkWell(
       onTap: onTap,
@@ -261,7 +288,9 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                color: selected ? active : inactive,
+                color: isDarkTheme
+                    ? (selected ? active : inactive.withOpacity(.8))
+                    : (selected ? active : inactive),
               ),
             ),
           ],

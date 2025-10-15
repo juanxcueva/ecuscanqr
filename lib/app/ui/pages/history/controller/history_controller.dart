@@ -1,8 +1,9 @@
 import 'package:ecuscanqr/app/domain/model/hive/qr_code_model.dart';
+import 'package:ecuscanqr/app/domain/repository/qr_repository.dart';
 import 'package:flutter_meedu/meedu.dart';
-import 'package:ecuscanqr/app/data/resources/local/hive_storage_service.dart';
 
 class HistoryController extends SimpleNotifier {
+  final qrRepository = Get.find<QrRepository>();
   List<QrCodeModel> _allQrs = [];
   List<QrCodeModel> _filteredQrs = [];
   String _selectedFilter = 'all'; // 'all', 'generated', 'scanned', 'favorites'
@@ -24,7 +25,7 @@ class HistoryController extends SimpleNotifier {
     notify();
 
     try {
-      _allQrs = HiveStorageService.getAllQrs();
+      _allQrs = qrRepository.getAllQrs();
       _applyFilters();
     } catch (e) {
       print('Error loading history: $e');
@@ -46,13 +47,13 @@ class HistoryController extends SimpleNotifier {
         result = _allQrs;
         break;
       case 'generated':
-        result = HiveStorageService.getGeneratedQrs();
+        result = qrRepository.getGeneratedQrs();
         break;
       case 'scanned':
-        result = HiveStorageService.getScannedQrs();
+        result = qrRepository.getScannedQrs();
         break;
       case 'favorites':
-        result = HiveStorageService.getFavoriteQrs();
+        result = qrRepository.getFavoriteQrs();
         break;
       default:
         result = _allQrs;
@@ -86,13 +87,13 @@ class HistoryController extends SimpleNotifier {
 
   // Alternar favorito
   Future<void> toggleFavorite(String id) async {
-    await HiveStorageService.toggleFavorite(id);
+    await qrRepository.toggleFavorite(id);
     await loadHistory();
   }
 
   // Eliminar QR
   Future<void> deleteQr(String id) async {
-    await HiveStorageService.deleteQr(id);
+    await qrRepository.deleteQr(id);
     await loadHistory();
   }
 
@@ -100,23 +101,23 @@ class HistoryController extends SimpleNotifier {
   Future<void> clearHistory() async {
     switch (_selectedFilter) {
       case 'all':
-        await HiveStorageService.clearAllQrs();
+        await qrRepository.clearAllQrs();
         break;
       case 'generated':
-        await HiveStorageService.clearGeneratedQrs();
+        await qrRepository.clearGeneratedQrs();
         break;
       case 'scanned':
-        await HiveStorageService.clearScannedQrs();
+        await qrRepository.clearScannedQrs();
         break;
       default:
-        await HiveStorageService.clearAllQrs();
+        await qrRepository.clearAllQrs();
     }
     await loadHistory();
   }
 
   // Obtener estadísticas
   Map<String, int> getStatistics() {
-    return HiveStorageService.getStatistics();
+    return qrRepository.getStatistics();
   }
 
   @override

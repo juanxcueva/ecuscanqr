@@ -23,9 +23,12 @@ class SplashPage extends StatelessWidget {
         }
       },
       builder: (_, controller) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final currentTheme = Theme.of(context);
+        final isDark = currentTheme.brightness == Brightness.dark;
         return Scaffold(
-          backgroundColor: isDark ? AppColors.darkColor : AppColors.lightBackground,
+          backgroundColor: isDark
+              ? AppColors.darkColor
+              : AppColors.lightBackground,
           body: Stack(
             children: [
               // Fondo animado
@@ -40,27 +43,27 @@ class SplashPage extends StatelessWidget {
 
                     // Glow + Logo (Hero)
                     const _PulseGlow(
-                      child: Hero(
-                        tag: "logo",
-                        child: LogoBadge(),
-                      ),
+                      child: Hero(tag: "logo", child: LogoBadge()),
                     ),
 
                     20.verticalSpace,
 
                     // Texto dinámico desde el controller
-                    Consumer(builder: (_, ref, __) {
-                      final c = ref.watch(splashProvider);
-                      return Text(
-                        c.text,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                            ),
-                      );
-                    }),
+                    Consumer(
+                      builder: (_, ref, __) {
+                        final c = ref.watch(splashProvider);
+                        return Text(
+                          c.text,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.5,
+                              ),
+                        );
+                      },
+                    ),
 
                     18.verticalSpace,
 
@@ -73,9 +76,9 @@ class SplashPage extends StatelessWidget {
                     Text(
                       "JC • Next-Gen Solutions",
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.metallicGrey.withOpacity(.85),
-                            letterSpacing: .3,
-                          ),
+                        color: AppColors.metallicGrey.withOpacity(.85),
+                        letterSpacing: .3,
+                      ),
                     ),
 
                     12.verticalSpace,
@@ -95,10 +98,12 @@ class _AnimatedGradientBackground extends StatefulWidget {
   const _AnimatedGradientBackground();
 
   @override
-  State<_AnimatedGradientBackground> createState() => _AnimatedGradientBackgroundState();
+  State<_AnimatedGradientBackground> createState() =>
+      _AnimatedGradientBackgroundState();
 }
 
-class _AnimatedGradientBackgroundState extends State<_AnimatedGradientBackground>
+class _AnimatedGradientBackgroundState
+    extends State<_AnimatedGradientBackground>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctl;
   late final Animation<double> _t;
@@ -106,7 +111,10 @@ class _AnimatedGradientBackgroundState extends State<_AnimatedGradientBackground
   @override
   void initState() {
     super.initState();
-    _ctl = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat(reverse: true);
+    _ctl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat(reverse: true);
     _t = CurvedAnimation(parent: _ctl, curve: Curves.easeInOut);
   }
 
@@ -119,9 +127,9 @@ class _AnimatedGradientBackgroundState extends State<_AnimatedGradientBackground
   @override
   Widget build(BuildContext context) {
     final colors = const [
-      AppColors.gradientTop,   // #00AFFF
-      AppColors.gradientMed,   // #0090E0
-      AppColors.gradientBottom // #0066CC
+      AppColors.gradientTop, // #00AFFF
+      AppColors.gradientMed, // #0090E0
+      AppColors.gradientBottom, // #0066CC
     ];
 
     return AnimatedBuilder(
@@ -161,8 +169,6 @@ class _AnimatedGradientBackgroundState extends State<_AnimatedGradientBackground
   }
 }
 
-
-
 /// Glow pulsante (escala + sombra) alrededor del logo.
 class _PulseGlow extends StatefulWidget {
   final Widget child;
@@ -172,16 +178,22 @@ class _PulseGlow extends StatefulWidget {
   State<_PulseGlow> createState() => _PulseGlowState();
 }
 
-class _PulseGlowState extends State<_PulseGlow> with SingleTickerProviderStateMixin {
+class _PulseGlowState extends State<_PulseGlow>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctl;
   late final Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
-    _ctl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))
-      ..repeat(reverse: true);
-    _scale = Tween(begin: 0.98, end: 1.04).animate(CurvedAnimation(parent: _ctl, curve: Curves.easeInOut));
+    _ctl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+    _scale = Tween(
+      begin: 0.98,
+      end: 1.04,
+    ).animate(CurvedAnimation(parent: _ctl, curve: Curves.easeInOut));
   }
 
   @override
@@ -223,13 +235,17 @@ class _LoadingDots extends StatefulWidget {
   State<_LoadingDots> createState() => _LoadingDotsState();
 }
 
-class _LoadingDotsState extends State<_LoadingDots> with SingleTickerProviderStateMixin {
+class _LoadingDotsState extends State<_LoadingDots>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ctl;
 
   @override
   void initState() {
     super.initState();
-    _ctl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat();
+    _ctl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
   }
 
   @override
@@ -256,7 +272,9 @@ class _LoadingDotsState extends State<_LoadingDots> with SingleTickerProviderSta
                 height: dotSize,
                 margin: const EdgeInsets.symmetric(horizontal: 5),
                 decoration: BoxDecoration(
-                  color: i == 1 ? AppColors.primaryColor : AppColors.secondaryColor,
+                  color: i == 1
+                      ? AppColors.primaryColor
+                      : AppColors.secondaryColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

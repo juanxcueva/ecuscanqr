@@ -20,6 +20,8 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Consumer(
       builder: (_, ref, __) {
         final controller = ref.watch(historyProvider);
@@ -37,11 +39,13 @@ class HistoryPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "History",
+                        "Historial",
                         style: TextStyle(
                           fontSize: 28.sp,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.lightText,
+                          color: isDarkTheme
+                              ? Colors.white
+                              : AppColors.lightText,
                         ),
                       ),
                       2.verticalSpace,
@@ -49,7 +53,9 @@ class HistoryPage extends StatelessWidget {
                         "${controller.filteredQrs.length} codes",
                         style: TextStyle(
                           fontSize: 13.sp,
-                          color: Colors.grey.shade600,
+                          color: isDarkTheme
+                              ? Colors.white.withOpacity(.7)
+                              : Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -61,7 +67,8 @@ class HistoryPage extends StatelessWidget {
                         color: Colors.red.shade400,
                         size: 26.r,
                       ),
-                      onPressed: () => _showClearDialog(context, controller),
+                      onPressed: () =>
+                          _showClearDialog(context, controller, isDarkTheme),
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(
                         minWidth: 40.w,
@@ -73,9 +80,7 @@ class HistoryPage extends StatelessWidget {
               12.verticalSpace,
 
               // Search bar más compacta
-              _SearchBar(
-                onChanged: (query) => controller.search(query),
-              ),
+              _SearchBar(onChanged: (query) => controller.search(query)),
               12.verticalSpace,
 
               // Filter chips más compactos
@@ -90,23 +95,30 @@ class HistoryPage extends StatelessWidget {
                 child: controller.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : controller.filteredQrs.isEmpty
-                        ? _EmptyState(filter: controller.selectedFilter)
-                        : RefreshIndicator(
-                            onRefresh: controller.loadHistory,
-                            child: ListView.builder(
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: controller.filteredQrs.length,
-                              itemBuilder: (context, index) {
-                                final qr = controller.filteredQrs[index];
-                                return _QrHistoryCard(
-                                  qr: qr,
-                                  onTap: () => _showQrDetails(context, qr, controller),
-                                  onFavorite: () => controller.toggleFavorite(qr.id),
-                                  onDelete: () => _confirmDelete(context, qr, controller),
-                                );
-                              },
-                            ),
-                          ),
+                    ? _EmptyState(filter: controller.selectedFilter)
+                    : RefreshIndicator(
+                        onRefresh: controller.loadHistory,
+                        child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: controller.filteredQrs.length,
+                          itemBuilder: (context, index) {
+                            final qr = controller.filteredQrs[index];
+                            return _QrHistoryCard(
+                              qr: qr,
+                              onTap: () =>
+                                  _showQrDetails(context, qr, controller),
+                              onFavorite: () =>
+                                  controller.toggleFavorite(qr.id),
+                              onDelete: () => _confirmDelete(
+                                context,
+                                qr,
+                                controller,
+                                isDarkTheme,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -114,19 +126,41 @@ class HistoryPage extends StatelessWidget {
       },
     );
   }
-void _showClearDialog(BuildContext context, HistoryController controller) {
+
+  void _showClearDialog(
+    BuildContext context,
+    HistoryController controller,
+    bool isDarkTheme,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: const Text('Clear History'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          '¿Estás seguro de eliminar todos los códigos QR ${controller.selectedFilter}?',
+          style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+        ),
         content: Text(
-          'Are you sure you want to delete all ${controller.selectedFilter} QR codes?',
+          'Esto eliminará permanentemente todos los códigos QR ${controller.selectedFilter} guardados en tu historial.',
+          style: TextStyle(
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.7)
+                : Colors.grey.shade600,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: isDarkTheme
+                    ? Colors.white.withOpacity(.7)
+                    : Colors.grey.shade600,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -134,24 +168,48 @@ void _showClearDialog(BuildContext context, HistoryController controller) {
               Navigator.pop(ctx);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Clear'),
+            child: Text('Eliminar', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  void _confirmDelete(BuildContext context, QrCodeModel qr, HistoryController controller) {
+  void _confirmDelete(
+    BuildContext context,
+    QrCodeModel qr,
+    HistoryController controller,
+    bool isDarkTheme,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: const Text('Delete QR Code'),
-        content: const Text('Are you sure you want to delete this QR code?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          '¿Estás seguro de eliminar este código QR?',
+          style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+        ),
+        content: Text(
+          'Esto eliminará permanentemente este código QR del historial.',
+          style: TextStyle(
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.7)
+                : Colors.grey.shade600,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: isDarkTheme
+                    ? Colors.white.withOpacity(.7)
+                    : Colors.grey.shade600,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -159,7 +217,7 @@ void _showClearDialog(BuildContext context, HistoryController controller) {
               Navigator.pop(ctx);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text('Eliminar', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -194,12 +252,12 @@ void _showClearDialog(BuildContext context, HistoryController controller) {
   Future<void> _handleOpen(String data) async {
     try {
       Uri? uri;
-      
+
       if (data.startsWith('http://') || data.startsWith('https://')) {
         uri = Uri.parse(data);
-      } else if (data.startsWith('mailto:') || 
-                 data.startsWith('tel:') || 
-                 data.startsWith('sms:')) {
+      } else if (data.startsWith('mailto:') ||
+          data.startsWith('tel:') ||
+          data.startsWith('sms:')) {
         uri = Uri.parse(data);
       } else if (data.startsWith('SMSTO:')) {
         final parts = data.substring(6).split(':');
@@ -207,7 +265,7 @@ void _showClearDialog(BuildContext context, HistoryController controller) {
           uri = Uri.parse('sms:${parts[0]}');
         }
       }
-      
+
       if (uri != null && await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
@@ -226,23 +284,30 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.7),
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.1)
+                : Colors.white.withOpacity(.7),
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(color: Colors.white.withOpacity(.8)),
           ),
           child: TextField(
             onChanged: onChanged,
             decoration: InputDecoration(
-              hintText: 'Search QR codes...',
+              hintText: 'Buscar códigos QR...',
               prefixIcon: const Icon(Icons.search, color: Color(0xFF6461FF)),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 12.h,
+              ),
             ),
           ),
         ),
@@ -257,18 +322,15 @@ class _FilterChips extends StatelessWidget {
   final String selectedFilter;
   final Function(String) onSelected;
 
-  const _FilterChips({
-    required this.selectedFilter,
-    required this.onSelected,
-  });
+  const _FilterChips({required this.selectedFilter, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
     final filters = [
-      {'id': 'all', 'label': 'All', 'icon': Icons.grid_view},
-      {'id': 'generated', 'label': 'Created', 'icon': Icons.add_circle_outline},
-      {'id': 'scanned', 'label': 'Scanned', 'icon': Icons.qr_code_scanner},
-      {'id': 'favorites', 'label': 'Favorites', 'icon': Icons.star},
+      {'id': 'all', 'label': 'Todos', 'icon': Icons.grid_view},
+      {'id': 'generated', 'label': 'Creados', 'icon': Icons.add_circle_outline},
+      {'id': 'scanned', 'label': 'Escaneados', 'icon': Icons.qr_code_scanner},
+      {'id': 'favorites', 'label': 'Favoritos', 'icon': Icons.star},
     ];
 
     return SizedBox(
@@ -281,7 +343,7 @@ class _FilterChips extends StatelessWidget {
         itemBuilder: (context, index) {
           final filter = filters[index];
           final isSelected = selectedFilter == filter['id'];
-          
+
           return _FilterChip(
             label: filter['label'] as String,
             icon: filter['icon'] as IconData,
@@ -309,6 +371,8 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -316,11 +380,15 @@ class _FilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFF6461FF)
+              : isDarkTheme
+              ? Colors.white.withOpacity(.1)
               : Colors.white.withOpacity(.7),
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF6461FF)
+                : isDarkTheme
+                ? Colors.grey.shade700
                 : Colors.grey.shade300,
           ),
         ),
@@ -330,7 +398,11 @@ class _FilterChip extends StatelessWidget {
             Icon(
               icon,
               size: 16.r,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
+              color: isSelected
+                  ? Colors.white
+                  : isDarkTheme
+                  ? Colors.grey.shade300
+                  : Colors.grey.shade700,
             ),
             6.horizontalSpace,
             Text(
@@ -338,7 +410,11 @@ class _FilterChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.grey.shade700,
+                color: isSelected
+                    ? Colors.white
+                    : isDarkTheme
+                    ? Colors.grey.shade300
+                    : Colors.grey.shade700,
               ),
             ),
           ],
@@ -365,6 +441,8 @@ class _QrHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+   final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
       child: ClipRRect(
@@ -372,14 +450,20 @@ class _QrHistoryCard extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Material(
-            color: Colors.white.withOpacity(.6),
+            color: isDarkTheme
+                ? Colors.white.withOpacity(.1)
+                : Colors.white.withOpacity(.6),
             child: InkWell(
               onTap: onTap,
               child: Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: Colors.white.withOpacity(.8)),
+                  border: Border.all(
+                    color: isDarkTheme
+                        ? Colors.white.withOpacity(.1)
+                        : Colors.white.withOpacity(.8),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -453,7 +537,9 @@ class _QrHistoryCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: isDarkTheme
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -464,7 +550,9 @@ class _QrHistoryCard extends StatelessWidget {
                             DateFormat('MMM dd • HH:mm').format(qr.createdAt),
                             style: TextStyle(
                               fontSize: 10.sp,
-                              color: Colors.grey.shade600,
+                              color: isDarkTheme
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade600,
                             ),
                           ),
                         ],
@@ -515,10 +603,9 @@ class _QrHistoryCard extends StatelessWidget {
     );
   }
 
-
   Color _getTypeColor(QrCodeModel qr) {
     if (qr.isScanned) return Colors.blue;
-    
+
     switch (qr.type) {
       case 'website':
         return const Color(0xFF5D9BFF);
@@ -549,19 +636,19 @@ class _EmptyState extends StatelessWidget {
 
     switch (filter) {
       case 'generated':
-        message = 'No QR codes created yet';
+        message = 'No existe ningún QR generado';
         icon = Icons.add_circle_outline;
         break;
       case 'scanned':
-        message = 'No QR codes scanned yet';
+        message = 'No existe ningún QR escaneado';
         icon = Icons.qr_code_scanner;
         break;
       case 'favorites':
-        message = 'No favorite QR codes';
+        message = 'No tienes QR favoritos';
         icon = Icons.star_border;
         break;
       default:
-        message = 'No QR codes yet';
+        message = 'No tienes QR guardados';
         icon = Icons.qr_code_2_outlined;
     }
 
@@ -569,11 +656,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 100.r,
-            color: Colors.grey.shade300,
-          ),
+          Icon(icon, size: 100.r, color: Colors.grey.shade300),
           16.verticalSpace,
           Text(
             message,
@@ -585,11 +668,8 @@ class _EmptyState extends StatelessWidget {
           ),
           8.verticalSpace,
           Text(
-            'Start creating or scanning QR codes',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.grey.shade500,
-            ),
+            'Empieza a generar o escanear códigos QR',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -616,10 +696,12 @@ class _QrDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F5FF),
+        color: isDarkTheme ? Colors.grey.shade900 : const Color(0xFFF3F5FF),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: SafeArea(
@@ -658,6 +740,7 @@ class _QrDetailsSheet extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
+                color: isDarkTheme ? Colors.white : Colors.black,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -667,22 +750,24 @@ class _QrDetailsSheet extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  qr.getTypeIcon(),
-                  style: TextStyle(fontSize: 14.sp),
-                ),
+                Text(qr.getTypeIcon(), style: TextStyle(fontSize: 14.sp)),
                 4.horizontalSpace,
                 Text(
                   qr.getTypeName(),
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: Colors.grey.shade600,
+                    color: isDarkTheme
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade600,
                   ),
                 ),
                 if (qr.isScanned) ...[
                   8.horizontalSpace,
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(.1),
                       borderRadius: BorderRadius.circular(8.r),

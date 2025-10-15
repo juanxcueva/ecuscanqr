@@ -33,6 +33,9 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
+
     // System UI overlay para status bar
     final overlay = SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
@@ -79,7 +82,7 @@ class _HomePageState extends State<HomePage>
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.lightText,
+                          color: isDarkTheme ? Colors.white.withOpacity(.8) : AppColors.lightText,
                         ),
                         children: [
                           TextSpan(
@@ -110,7 +113,7 @@ class _HomePageState extends State<HomePage>
                         fontSize: 30.sp,
                         height: 1.05,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.lightText,
+                        color: isDarkTheme ? Colors.white.withOpacity(.8) : AppColors.lightText,
                         letterSpacing: .2,
                       ),
                     ),
@@ -145,6 +148,7 @@ class _HomePageState extends State<HomePage>
   // Método que se ejecuta al hacer tap en una opción
   void _onOptionTapped(_QrOption option) {
     // Por ahora solo mostramos un SnackBar
+    /*
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${option.title} QR selected'),
@@ -156,6 +160,7 @@ class _HomePageState extends State<HomePage>
         duration: const Duration(seconds: 2),
       ),
     );
+    */
 
     Navigator.push(
       context,
@@ -177,14 +182,22 @@ class _SoftLightBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
+      decoration:  BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Color(0xFFF3F5FF), // casi blanco con tinte violeta
-            Color(0xFFF7F8FB),
-            Color(0xFFF9F5FF), // toque rosado pálido
-          ],
+          colors: isDarkTheme
+              ? [
+                  Color(0xFF1A1C24), // casi negro con tinte violeta
+                  Color(0xFF22252D),
+                  Color(0xFF292C34), // toque rosado pálido
+                ]
+              : [
+                  Color(0xFFF3F5FF), // casi blanco con tinte violeta
+                  Color(0xFFF7F8FB),
+                  Color(0xFFF9F5FF), // toque rosado pálido
+                ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -254,6 +267,8 @@ class _GlassOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = Theme.of(context);
+    final isDarkTheme = currentTheme.brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: ClipRRect(
@@ -261,7 +276,7 @@ class _GlassOptionTile extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
           child: Material(
-            color: Colors.transparent,
+            color: isDarkTheme ? Colors.grey.withOpacity(.05) : Colors.transparent,
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(18.r),
@@ -271,14 +286,19 @@ class _GlassOptionTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18.r),
                   border: Border.all(
-                    color: Colors.white.withOpacity(.65),
+                    color: isDarkTheme ? Colors.grey.withOpacity(.65) : Colors.white.withOpacity(.65),
                     width: 1,
                   ),
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(.72),
-                      Colors.white.withOpacity(.52),
-                    ],
+                    colors: isDarkTheme
+                        ? [
+                            Colors.grey.withOpacity(.72),
+                            Colors.grey.withOpacity(.52),
+                          ]
+                        : [
+                            Colors.white.withOpacity(.72),
+                            Colors.white.withOpacity(.52),
+                          ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -311,7 +331,7 @@ class _GlassOptionTile extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Icon(icon, color: Colors.white, size: 22.r),
+                      child: Icon(icon, color: isDarkTheme ? Colors.white.withOpacity(.85) : Colors.white, size: 22.r),
                     ),
                     12.horizontalSpace,
                     Expanded(
@@ -320,14 +340,14 @@ class _GlassOptionTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: Colors.black.withOpacity(.85),
+                          color: isDarkTheme ? Colors.white.withOpacity(.85) : Colors.black.withOpacity(.85),
                         ),
                       ),
                     ),
                     Icon(
                       Icons.chevron_right_rounded,
                       size: 26.r,
-                      color: Colors.black.withOpacity(.55),
+                      color: isDarkTheme ? Colors.white.withOpacity(.55) : Colors.black.withOpacity(.55),
                     ),
                   ],
                 ),

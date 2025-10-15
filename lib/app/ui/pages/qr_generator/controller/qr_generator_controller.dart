@@ -1,9 +1,11 @@
 import 'package:ecuscanqr/app/domain/model/hive/qr_code_model.dart';
+import 'package:ecuscanqr/app/domain/repository/qr_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_meedu/meedu.dart';
-import 'package:ecuscanqr/app/data/resources/local/hive_storage_service.dart';
 
 class QrGeneratorController extends SimpleNotifier {
+  final qrRepository = Get.find<QrRepository>();
+
   String _qrType = '';
   final Map<String, String> _fields = {};
   String _generatedData = '';
@@ -158,7 +160,7 @@ class QrGeneratorController extends SimpleNotifier {
         isScanned: false,
       );
 
-      await HiveStorageService.saveQr(qrCode);
+      await qrRepository.saveQr(qrCode);
 
       if (context.mounted) {
         // Cerrar el teclado primero
@@ -171,7 +173,7 @@ class QrGeneratorController extends SimpleNotifier {
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
-                const Text('QR Code saved successfully!'),
+                const Text('Código QR guardado con éxito!'),
               ],
             ),
             backgroundColor: Colors.green,
@@ -187,7 +189,7 @@ class QrGeneratorController extends SimpleNotifier {
         Navigator.pop(context);
       }
     } catch (e) {
-      print('Error saving QR: $e');
+      print('Error guardando el código QR: $e');
       
       // Reactivar el botón si hay error
       _isValid = true;
@@ -196,7 +198,7 @@ class QrGeneratorController extends SimpleNotifier {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving QR: $e'),
+            content: Text('Error guardando el código QR: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
