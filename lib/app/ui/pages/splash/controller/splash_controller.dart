@@ -15,15 +15,15 @@ class SplashController extends SimpleNotifier {
     await Future.delayed(const Duration(milliseconds: 200));
     notify();
 
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 500));
     text = "$text.";
     notify();
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     text = "$text.";
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 500));
     navigate = true;
-    route = Routes.home;
+    route = Routes.bottomNavBar;
 
     notify();
   }

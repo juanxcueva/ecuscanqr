@@ -1,9 +1,6 @@
-// about_page.dart
-import 'package:ecua_tres_en_raya/app/ui/global_widgets/game_header_widget.dart';
-import 'package:ecua_tres_en_raya/app/ui/pages/about/controller/about_controller.dart';
-import 'package:ecua_tres_en_raya/app/ui/pages/about/widgets/about_tile_widget.dart';
-import 'package:ecua_tres_en_raya/app/ui/pages/about/widgets/cofee_button.dart';
-import 'package:ecua_tres_en_raya/app/ui/theme/app_colors.dart';
+import 'dart:ui';
+import 'package:ecuscanqr/app/ui/pages/about/controller/about_controller.dart';
+import 'package:ecuscanqr/app/ui/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_meedu/meedu.dart';
 import 'package:flutter_meedu/ui.dart';
@@ -11,9 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final aboutProvider = SimpleProvider(
-  (ref) => AboutController(),
-);
+final aboutProvider = SimpleProvider((ref) => AboutController());
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -28,85 +23,422 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      body: Stack(
+        children: [
+          // Fondo pastel igual que HomePage
+          const Positioned.fill(child: _SoftLightBackground()),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back button
+                  IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.7),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(.8)),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: const Color(0xFF6461FF),
+                        size: 20.r,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  12.verticalSpace,
+
+                  // Header
+                  Center(
+                    child: Column(
+                      children: [
+                        // Logo/Avatar
+                        Container(
+                          width: 100.r,
+                          height: 100.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF6461FF), Color(0xFF8B87FF)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6461FF).withOpacity(.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 50.r,
+                            color: Colors.white,
+                          ),
+                        ),
+                        16.verticalSpace,
+                        Text(
+                          "EcuaScanQR",
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.lightText,
+                          ),
+                        ),
+                        8.verticalSpace,
+                        Consumer(
+                          builder: (_, ref, __) {
+                            final version = ref
+                                .watch(aboutProvider.select((s) => s.version))
+                                .version;
+                            return Text(
+                              "Version $version",
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey.shade600,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  32.verticalSpace,
+
+                  // Developer info
+                  _InfoCard(
+                    title: "Developed by",
+                    items: [
+                      _InfoItem(
+                        icon: FontAwesomeIcons.code,
+                        label: "Developer",
+                        value: "juanxcueva",
+                        onTap: null,
+                      ),
+                      _InfoItem(
+                        icon: FontAwesomeIcons.locationDot,
+                        label: "Location",
+                        value: "Cuenca, Ecuador",
+                        onTap: null,
+                      ),
+                    ],
+                  ),
+                  20.verticalSpace,
+
+                  // Social links
+                  _InfoCard(
+                    title: "Connect",
+                    items: [
+                      _InfoItem(
+                        icon: FontAwesomeIcons.instagram,
+                        label: "Instagram",
+                        value: "@juanxcueva",
+                        onTap: () => _openUrl('https://www.instagram.com/juanxcueva'),
+                      ),
+                      _InfoItem(
+                        icon: FontAwesomeIcons.github,
+                        label: "GitHub",
+                        value: "github.com/juanxcueva",
+                        onTap: () => _openUrl('https://github.com/juanxcueva'),
+                      ),
+                    ],
+                  ),
+                  20.verticalSpace,
+
+                  // Buy me a coffee button
+                  _CoffeeButton(
+                    onTap: () => _openUrl('https://www.buymeacoffee.com/juanxcueva'),
+                  ),
+                  24.verticalSpace,
+
+                  // App description
+                  _InfoCard(
+                    title: "About the App",
+                    items: [
+                      _DescriptionItem(
+                        text: "EcuaScanQR is a powerful and easy-to-use QR code "
+                            "generator and scanner. Create QR codes for websites, "
+                            "texts, emails, SMS, and WiFi networks. Scan any QR "
+                            "code instantly and manage your history.",
+                      ),
+                    ],
+                  ),
+                  24.verticalSpace,
+
+                  // Made with love
+                  Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Made with",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        6.horizontalSpace,
+                        Icon(
+                          Icons.favorite,
+                          size: 14.r,
+                          color: Colors.red.shade400,
+                        ),
+                        6.horizontalSpace,
+                        Text(
+                          "in Ecuador",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ------------------------------ Background ------------------------------ */
+
+class _SoftLightBackground extends StatelessWidget {
+  const _SoftLightBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFF3F5FF),
+            Color(0xFFF7F8FB),
+            Color(0xFFF9F5FF),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    );
+  }
+}
+
+/* ------------------------------ Info Card ------------------------------ */
+
+class _InfoCard extends StatelessWidget {
+  final String title;
+  final List<Widget> items;
+
+  const _InfoCard({
+    required this.title,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.lightText,
+            ),
+          ),
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20.r),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(.7),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: Colors.white.withOpacity(.8)),
+              ),
+              child: Column(
+                children: items,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/* ------------------------------ Info Item ------------------------------ */
+
+class _InfoItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
+
+  const _InfoItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
+            ),
+          ),
+          child: Row(
             children: [
-              // Header unificado
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: GameHeader(
-                  title: 'Acerca de',
-                  turnText: '',
-                  turnColor: Colors.transparent,
-                  showTurnChip: false,
-                  onBack: () => Navigator.of(context).pop(),
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6461FF).withOpacity(.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: FaIcon(
+                  icon,
+                  color: const Color(0xFF6461FF),
+                  size: 20.r,
                 ),
               ),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+              16.horizontalSpace,
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const AboutInfoTile(
-                      title: 'Desarrollado por',
-                      subtitle: 'juanxcueva',
-                      icon: FontAwesomeIcons.dev,
-                      interactive: false,
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
-                    SizedBox(height: 12.h),
-
-                    Consumer(builder: (_, ref, __) {
-                      final version = ref
-                          .watch(aboutProvider.select((s) => s.version))
-                          .version;
-                      return AboutInfoTile(
-                        title: 'Versión',
-                        subtitle: version,
-                        icon: FontAwesomeIcons.codeBranch,
-                        interactive: false,
-                      );
-                    }),
-                    SizedBox(height: 12.h),
-
-                    AboutInfoTile(
-                      title: 'Instagram',
-                      subtitle: '@juanxcueva',
-                      icon: FontAwesomeIcons.instagram,
-                      onTap: () =>
-                          _openUrl('https://www.instagram.com/juanxcueva'),
+                    4.verticalSpace,
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
-                    SizedBox(height: 12.h),
-
-                    AboutInfoTile(
-                      title: 'Sitio web',
-                      subtitle: 'github.com/juanxcueva',
-                      icon: FontAwesomeIcons.globe,
-                      onTap: () => _openUrl('https://github.com/juanxcueva'),
-                    ),
-                    SizedBox(height: 12.h),
-
-                    const AboutInfoTile(
-                      title: 'Dirección',
-                      subtitle: 'Cuenca, Ecuador',
-                      icon: FontAwesomeIcons.locationDot,
-                      interactive: false,
-                    ),
-                    SizedBox(height: 20.h),
-
-                    // CTA destacado
-                    CoffeeButton(
-                      onTap: () =>
-                          _openUrl('https://www.buymeacoffee.com/juanxcueva'),
-                    ),
-                    SizedBox(height: 24.h),
                   ],
                 ),
               ),
+              if (onTap != null)
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16.r,
+                  color: Colors.grey.shade400,
+                ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ------------------------------ Description Item ------------------------------ */
+
+class _DescriptionItem extends StatelessWidget {
+  final String text;
+
+  const _DescriptionItem({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16.w),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14.sp,
+          height: 1.6,
+          color: Colors.grey.shade700,
+        ),
+        textAlign: TextAlign.justify,
+      ),
+    );
+  }
+}
+
+/* ------------------------------ Coffee Button ------------------------------ */
+
+class _CoffeeButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _CoffeeButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 16.h),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFDD00), Color(0xFFFFA000)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFFDD00).withOpacity(.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.mugHot,
+              color: Colors.white,
+              size: 24.r,
+            ),
+            12.horizontalSpace,
+            Text(
+              "Buy me a coffee",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
